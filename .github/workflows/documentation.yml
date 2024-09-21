@@ -55,8 +55,6 @@ jobs:
     - name: Conan Install
       run: >
         conan install conanfile.py 
-        --profile:build=~/.conan2/profiles/default 
-        --profile:host=~/.conan2/profiles/default 
         --build=missing 
         --output-folder=build
 
