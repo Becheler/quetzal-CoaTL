@@ -10,7 +10,7 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24s.04
 
     steps:
     - uses: actions/checkout@v4
@@ -32,8 +32,9 @@ jobs:
       with:
         python-version: 3.x
 
-    - name: Set Up Conan
-      run: pip install conan==2.0.13
+    - name: Conan installation
+      run: |
+        pip install -U conan
 
     - name: Cache Conan
       uses: actions/cache@v4
