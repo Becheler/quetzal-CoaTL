@@ -25,12 +25,22 @@ namespace quetzal::geography
 /// @param directionality A policy class giving the directionality (isotropy or anisotropy)
 /// @param bound A BoundPolicy
 /// @return A graph with the desired level of connectivity
-template <two_dimensional SpatialGrid, class VertexProperty, class EdgeProperty, class Vicinity,
-          directional Directionality, class Policy>
+template<
+    two_dimensional SpatialGrid, 
+    directional Directionality, 
+    class VertexProperty, 
+    class EdgeProperty, 
+    class Vicinity,
+    class Policy
+>
 auto from_grid(SpatialGrid const &grid, VertexProperty const &v, EdgeProperty const &e, Vicinity const &vicinity,
                Directionality dir, Policy const &bounding_policy)
 {
-    using graph_type = quetzal::geography::graph<VertexProperty, EdgeProperty, typename Vicinity::connectedness, Directionality>;
+    namespace geo = quetzal::geography;
+    using connectedness = Vicinity::connectedness;
+    using graph_type = geo::graph<VertexProperty, EdgeProperty, connectedness, Directionality>;
+    using vertex_t = graph_type::vertex_descriptor;
+
     graph_type graph( grid.width() * grid.height() + bounding_policy.num_extra_vertices() ) ;
     vicinity.connect(graph, grid, bounding_policy);
 
@@ -42,7 +52,12 @@ auto from_grid(SpatialGrid const &grid, VertexProperty const &v, EdgeProperty co
 
     if constexpr ( ! std::is_same_v<EdgeProperty, no_property>) {
         for(auto edge : graph.edges()){
-            graph[edge] = e;
+            if constexpr (std::constructible_from<VertexProperty, vertex_t, vertex_t, SpatialGrid>){
+                graph[edge] = EdgeProperty(edge.source(), edge.target(), grid);
+            } else {
+                static_assert(std::is_default_constructible_v<EdgeProperty>);
+                graph[edge] = e;
+            }
         }
     }
 

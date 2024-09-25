@@ -1106,7 +1106,7 @@ Where:
 
 A straightforward approach to determine the dispersal mode across a complete spatial graph involves correlating the geographic distance between two locations with the likelihood of dispersal between them. The objective of this section is to highlight this model choice by parametrizing a simple Dispersal Location Kernel (in the sense of <a href="nathan-et-al-2012.pdf" target="_blank"><b> Nathan et al. 2012</b></a>). Additionally, we will calculate essential metrics, such as the distance between two coordinates, the dispersal probability between them, and the average dispersal distance anticipated under this distribution.
 
-### Basics
+### Model's Basics
 
 The dispersal location kernel represents the statistical pattern of dispersal distances within a population. In this context, it essentially serves as the probability density function (pdf) that outlines the distribution of locations after dispersal in relation to the original location. The expressions have been adjusted to incorporate a scale parameter, 
 \f$a\f$, which is consistent with a distance unit, and a shape parameter, 
@@ -1126,7 +1126,7 @@ Quetzal incorporates various kernel types available in the `quetzal::demography:
 
 ---
 
-### Using Kernels with Spatial Graphs
+### Kernels from Spatial Graphs
 
 Users can create a spatial graph from landscape data, customizing assumptions about connectivity and topology. By defining a dispersal kernel and calculating dispersal probabilities for each edge based on distance metrics, users can uncover insights into potential dispersal patterns within the spatial graph. This approach offers a powerful means for exploring and understanding spatial dynamics and connectivity, facilitating deeper analysis of ecological or geographic phenomena.
 
@@ -1142,12 +1142,25 @@ Here we show how to simply print out the probabilities computed at each edge of 
 
 ---
 
-### Using Kernels with Spatial Graphs
+### Using Kernels with Spatial Graphs Edges
 
-In the simulation context, it can be a better alternative to compute the dispersal probabilities along the edges
-of the graph once for all - especially if those are constant through time.
+In a simulation context, it can be more efficient to compute the dispersal probabilities along the graph's edges once, especially if these probabilities remain constant over time. This saves repeated computations during each simulation step.
 
-Here we show how to modify the edge property in order to conserve the probabilities computed at each edge of the spatial graph.
+There are two main approaches for setting edge properties:
+
+1. **Default Initialization and Later Update:** You can create the graph with default edge properties and then update those properties later by iterating over the edges. It's simple to implement, but you pay the cost of iterating twice over the edges.
+
+2. **Direct Initialization:** If you want to initialize the edge properties directly, the property itself should be a user-defined class with a proper default constructor, allowing for efficient initialization during graph creation. This approach helps optimize performance, particularly in simulations with many edges or static dispersal probabilities.
+
+#### Default Initialization and Later Update
+
+Here, we explain how to create a weighted graph with default edge properties and update those properties later by iterating over the edges.
+
+First, when constructing the graph, each edge is initialized with a default set of properties (e.g., weights, dispersal probabilities). This allows you to quickly set up the graph structure without needing to provide specific values for every edge upfront.
+
+Once the graph is created, you can update the edge properties by looping through each edge and assigning more accurate or context-specific values. This method is particularly useful when the final edge properties are derived from complex calculations or external data that may not be immediately available at graph creation.
+
+By initializing the graph with default values, you maintain flexibility, allowing you to efficiently adjust edge properties later in the simulation or process without needing to recreate the entire graph structure.
 
 **Input**
 
@@ -1156,3 +1169,17 @@ Here we show how to modify the edge property in order to conserve the probabilit
 **Output**
 
 @include{lineno} geography_dispersal_kernel_3.txt
+
+#### Direct Initialization
+
+Here, we demonstrate how to directly initialize the edge properties during graph creation. This approach is particularly useful when working with large graphs, where manually updating each edge later would be inefficient. By initializing the properties in place, you can ensure that each edge has the correct values from the start. 
+
+This method requires defining a user-specific Edge Property class, which includes a default constructor to allow for proper instantiation. Doing so enables you to efficiently assign properties such as dispersal probabilities or weights directly to the graph’s edges during the initial setup, streamlining the overall process.
+
+**Input**
+
+@include{lineno} geography_dispersal_kernel_4.cpp
+
+**Output**
+
+@include{lineno} geography_dispersal_kernel_4.txt
